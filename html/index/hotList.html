@@ -1,0 +1,164 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width"/>
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>Hello APP</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/index/hotList.css"/>
+</head>
+<body>
+<div class="words">
+</div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="../../script/engine.js"></script>
+<script type="text/javascript">
+    function initHotWords() {
+        api.ajax({
+            url: hotWordEngines.default.url,
+            dataType: 'text',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.63 Safari/537.36 Qiyu/2.1.1.1'
+            }
+        }, function (ret, err) {
+            var $words = $('.words');
+            if (ret) {
+                var $html = $(ret);
+                var $hotWords = $html.find(hotWordEngines.default.selector);
+                if ($hotWords.length === 0) {
+                    $words.append('<div class="empty">热搜数据获取失败</div>');
+                    api.toast({
+                        msg: '热搜数据获取失败',
+                        duration: 2000,
+                        location: 'bottom'
+                    });
+                } else {
+                    $hotWords.each(function () {
+                        $words.append('<div class="word">' + eval('$(this)' + hotWordEngines.default.method) + '</div>');
+                    });
+                }
+            } else {
+                $words.append('<div class="empty">热搜数据获取失败</div>');
+                api.toast({
+                    msg: '热搜数据获取失败',
+                    duration: 2000,
+                    location: 'bottom'
+                });
+            }
+        });
+    }
+
+    var pageNumber = hotWordEngines.more.pageNumberStart;
+    var loadSpecial = false, loading = false;
+
+    function initSpecialWords(showLoading, forceLoad) {
+        if (!forceLoad && loading)
+            return;
+        if (forceLoad)
+            pageNumber = hotWordEngines.more.pageNumberStart;
+        loading = true;
+        if (showLoading) {
+            api.showProgress({
+                title: '努力加载中...',
+                text: '先喝杯茶...',
+                modal: false
+            });
+        }
+        api.ajax({
+            url: hotWordEngines.more.url.replace('{pageNumber}', pageNumber),
+            dataType: 'text'
+        }, function (ret, err) {
+            if (ret) {
+                var $html = $(ret);
+                var $hotWords = $html.find(hotWordEngines.more.selector);
+                var $words = $('.words');
+                if (!loadSpecial || forceLoad) {
+                    $words.empty();
+                }
+                if (pageNumber)
+                    if ($hotWords.length === 0) {
+                        api.toast({
+                            msg: loadSpecial ? '已无更多数据' : '热搜数据获取失败',
+                            duration: 2000,
+                            location: 'bottom'
+                        });
+                        if (pageNumber > hotWordEngines.more.pageNumberStart) {
+                            if (loadSpecial)
+                                pageNumber -= 1;
+                        }
+                    } else {
+                        loadSpecial = true;
+                        $hotWords.each(function () {
+                            $words.append('<div class="word">' + eval('$(this)' + hotWordEngines.default.method) + '</div>');
+                        });
+                        api.refreshHeaderLoadDone();
+                        pageNumber += 1;
+                    }
+            } else {
+                api.toast({
+                    msg: '热搜数据获取失败',
+                    duration: 2000,
+                    location: 'bottom'
+                });
+                if (pageNumber > hotWordEngines.more.pageNumberStart) {
+                    if (loadSpecial)
+                        pageNumber -= 1;
+                }
+            }
+            if (showLoading) {
+                api.hideProgress();
+            }
+            loading = false;
+        });
+    }
+
+    /**
+     * 初始化页面监听事件
+     */
+    function initEvent() {
+        /**上拉加载 */
+        api.addEventListener({
+            name: 'scrolltobottom',
+            extra: {
+                threshold: 0
+            }
+        }, function (ret, err) {
+            if (pageNumber !== hotWordEngines.more.pageNumberStart) {
+                initSpecialWords(true);
+            }
+        });
+        /** 下拉刷新 */
+        api.setRefreshHeaderInfo({
+            bgColor: '#eee',
+            textColor: '#888',
+            textDown: '下拉刷新...',
+            textUp: '松开刷新...'
+        }, function (ret, err) {
+            initSpecialWords(false, true);
+        });
+
+        $api.addEvt($api.dom('.words'), 'click', function (e) {
+            if (e.target.className === 'word') {
+                api.openWin({
+                    name: 'searchResult',
+                    url: '../searchResult.html',
+                    pageParam: {
+                        keyWords: e.target.innerText
+                    }
+                });
+            }
+        });
+    }
+
+    apiready = function () {
+        initHotWords();
+        initEvent();
+    };
+</script>
+
+</html>

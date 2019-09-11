@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/search/searchRecord.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/iconfont/iconfont.css">
+</head>
+<body>
+<div class="clear">清空历史记录</div>
+<ul id="historyList">
+
+</ul>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript">
+    var historyFile = 'fs://btHistory.txt';
+
+    function initView() {
+        restoreHistory();
+    }
+
+    function restoreHistory(empty) {
+        api.readFile({
+            path: historyFile
+        }, function (ret, err) {
+            if (ret.status) {
+                var historyString = ret.data;
+                var historyArray = historyString.split(/\n/);
+                var historyList = $api.dom('#historyList');
+                if (empty)
+                    $api.html(historyList, '');
+                for (var i = 0; i < historyArray.length; i++) {
+                    var history = historyArray[i];
+                    if (history.trim().length !== 0) {
+                        $api.append(historyList, buildHistoryItem(history));
+                    }
+                }
+            }
+        });
+
+    }
+
+    function buildHistoryItem(keyWords) {
+        var item = [];
+        item.push('<li>');
+        item.push('<div class="text"><i class="iconfont icon-history"></i>' + keyWords + '</div>');
+        item.push('<div class="delete"><i class="iconfont icon-clear"></i></div>');
+        item.push('</li>');
+        return item.join('');
+    }
+
+    function initEvent() {
+        $api.addEvt($api.dom('#historyList'), 'click', function (e) {
+            if (e.target.className.indexOf('text') !== -1) {
+                search($api.text(e.target));
+            }
+        });
+
+        $api.addEvt($api.dom('.clear'), 'click', function (e) {
+            e.preventDefault();
+            clearHistory();
+        });
+
+        $api.addEvt($api.dom('#historyList'), 'click', function (e) {
+            if (e.target.className.indexOf('delete') !== -1 || e.target.className.indexOf('icon-clear') !== -1) {
+                clearHistory($api.text($api.closest(e.target, 'li')), $api.closest(e.target, 'li'));
+            }
+        });
+    }
+
+    function clearHistory(keyWords, keyWordsElement) {
+        var historyList = $api.dom('#historyList');
+        if (keyWords == null || keyWords.trim().length === 0) {
+            api.writeFile({
+                path: historyFile,
+                data: '',
+                append: false
+            }, function (ret, err) {
+                if (ret.status) {
+                    $api.html(historyList, '');
+                    api.toast({
+                        msg: '历史记录已清空',
+                        duration: 2000,
+                        location: 'bottom'
+                    });
+                }
+            });
+        } else {
+            keyWords = keyWords.trim();
+            api.readFile({
+                path: historyFile
+            }, function (ret, err) {
+                var historyString = ret.data;
+                var historyArray = historyString.split(/\n/);
+                if (historyArray.indexOf(keyWords) !== -1) {
+                    historyArray.splice(historyArray.indexOf(keyWords), 1);
+                    api.writeFile({
+                        path: historyFile,
+                        data: historyArray.join("\n")
+                    }, function (ret, err) {
+                        if (ret.status) {
+                            $api.remove(keyWordsElement);
+                            api.toast({
+                                msg: '历史记录已删除',
+                                duration: 2000,
+                                location: 'bottom'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    function search(keyWords) {
+        api.openWin({
+            name: 'searchResult',
+            url: '../searchResult.html',
+            pageParam: {
+                keyWords: keyWords
+            }
+        });
+    }
+
+    apiready = function () {
+        initView();
+        initEvent();
+    };
+</script>
+</html>

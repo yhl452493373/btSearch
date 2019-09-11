@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,initial-scale=1.0,width=device-width"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>Hello APP</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/iconfont/iconfont.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/index/index.css"/>
+</head>
+<body>
+<header>
+    <div class="header-button"></div>
+    <div class="header-title">种子搜索</div>
+    <div class="header-button"></div>
+</header>
+<section class="search-box"></section>
+<section class="hot-list">
+    <div class="hot-words">最近热门搜索：</div>
+</section>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+    function initView() {
+        var header = $api.dom('header'); // 获取 header 标签元素
+        var searchBox = $api.dom('.search-box');
+        var hotWordsLabel = $api.dom('.hot-words');
+        // 1.修复开启沉浸式效果带来的顶部Header与手机状态栏重合的问题，最新api.js方法已支持适配iPhoneX；
+        // 2.默认已开启了沉浸式效果 config.xml中 <preference name="statusBarAppearance" value="true"/>
+        // 3.沉浸式效果适配支持iOS7+，Android4.4+以上版本
+        var headerH = $api.fixStatusBar(header);
+        var searchBoxOffset = $api.offset(searchBox);
+        var howWordsLabelOffset = $api.offset(hotWordsLabel);
+
+        api.openFrame({
+            name: 'searchBox',
+            url: 'index/searchBox.html',
+            rect: {
+                marginTop: headerH,
+                h: searchBoxOffset.h
+            },
+            bounces: false
+        });
+
+        api.openFrame({
+            name: 'hotList',
+            url: 'index/hotList.html',
+            bounces: true,
+            rect: { // 推荐使用Margin布局，用于适配屏幕的动态变化
+                marginTop: headerH + searchBoxOffset.h + howWordsLabelOffset.h, // main页面距离win顶部的高度
+                w: 'auto' // main页面的宽度 自适应屏幕宽度
+            }
+        });
+    }
+
+    function initEvent() {
+        exitApp();
+    }
+
+    function exitApp() {
+        api.addEventListener({
+            name: 'keyback'
+        }, function (ret, err) {
+            api.toast({
+                msg: '再按一次返回键退出' + api.appName,
+                duration: 2000,
+                location: 'bottom'
+            });
+
+            api.addEventListener({
+                name: 'keyback'
+            }, function (ret, err) {
+                api.closeWidget({
+                    id: 'A6088754925676',     //这里改成自己的应用ID
+                    retData: {name: 'closeWidget'},
+                    silent: true
+                });
+            });
+
+            setTimeout(function () {
+                exitApp();
+            }, 2000)
+        });
+    }
+
+    apiready = function () {
+        initEvent();
+        initView();
+    };
+</script>
+</html>

@@ -1,0 +1,52 @@
+$main-color = #FF5722
+$main-font-size = 1.4rem
+
+$header-height = 5rem
+$footer-height = 3rem
+
+$header-font-size = 2rem
+
+html,
+body
+  margin 0
+  padding 0
+  height 100%
+  font-size 62.5%
+  *
+    font-size 1.4rem
+
+base()
+  header
+    height $header-height
+    width 100%
+    text-align center
+    background-color $main-color
+    color #fff
+    line-height @height
+    font-size $header-font-size
+    .header-button
+      text-align center
+      flex-basis 5rem
+      height $header-height
+      line-height @height
+      background-color $main-color
+      box-sizing border-box
+    .header-title
+      flex 1
+      height $header-height
+      line-height @height
+      color #fff
+      border none
+      outline none
+      background $main-color
+      padding 0 1rem
+      font-size 1.6rem
+      box-sizing border-box
+
+footer
+  height $footer-height
+  width 100%
+  background-color $main-color
+  color #fff
+  line-height @height
+  text-align center

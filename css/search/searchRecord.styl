@@ -1,0 +1,43 @@
+@import "../common.styl"
+
+.clear
+  font-size 1.4rem
+  height 3rem
+  line-height @height
+  text-align center
+  color #aaa
+  border-bottom 0.1rem solid #eee
+  margin 0 1rem
+
+ul, li
+  margin 0
+  padding 0
+  list-style none
+
+li
+  display flex
+  height 4rem
+  line-height @height
+  position relative
+  margin-left 1rem
+  color #999
+  &:after
+    content ''
+    height 0.1rem
+    width 100%
+    background #eee
+    position absolute
+    left 0
+    bottom 0
+  .text
+    flex 1
+    white-space nowrap
+    overflow hidden
+    text-overflow ellipsis
+  .delete
+    flex-basis 4rem
+    text-align center
+  .iconfont
+    display inline-block
+    width 3rem
+    text-align center

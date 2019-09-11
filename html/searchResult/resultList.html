@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/searchResult/resultList.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/iconfont/iconfont.css">
+</head>
+
+<body>
+    <div class="loading">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+    <div id="result">
+
+    </div>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript" src="../../script/Base64.js"></script>
+<script type="text/javascript" src="../../script/ThunderURIEncode.js"></script>
+<script type="text/javascript" src="../../script/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="../../script/jquery.md5.min.js"></script>
+<script type="text/javascript">
+    var isFirstOpen = true; //是否第一次加载
+    var pageNumber = 0; //当前页码
+    var pageNumberStart = 0; //第一页
+
+    var showLoading = function() {
+        $api.addCls($api.dom('.loading'), 'show');
+    };
+
+    var hideLoading = function() {
+        $api.removeCls($api.dom('.loading'), 'show');
+    };
+
+    /**
+     * 初始化页面监听事件
+     */
+    function initEvent(pageParam) {
+        var appsMap = pageParam.appsMap;
+
+        /**上拉加载 */
+        api.addEventListener({
+            name: 'scrolltobottom',
+            extra: {
+                threshold: 0
+            }
+        }, function(ret, err) {
+            loadEngineData(pageParam);
+        });
+        /** 下拉刷新 */
+        api.setRefreshHeaderInfo({
+            bgColor: '#FF5722',
+            textColor: '#fff',
+            textDown: '下拉刷新...',
+            textUp: '松开刷新...'
+        }, function(ret, err) {
+            isFirstOpen = true;
+            loadEngineData(pageParam);
+        });
+
+        var clipBoard = api.require('clipBoard');
+        $('#result').on('click', '.copy', function() {
+            clipBoard.set({
+                value: Base64.decode($(this).parent().attr('data-magnet'))
+            }, function(ret, err) {
+                if (ret) {
+                    api.toast({
+                        msg: '磁力链接复制成功',
+                        duration: 2000,
+                        location: 'bottom'
+                    });
+                } else {
+                    api.toast({
+                        msg: '磁力链接复制失败',
+                        duration: 2000,
+                        location: 'bottom'
+                    });
+                }
+            });
+        }).on('click', '.download', function() {
+            var $this = $(this);
+            var $parent = $this.parent();
+            //用浏览器下载种子文件
+            var url = Base64.decode($parent.attr('data-magnet'));
+            api.openApp({
+                androidPkg: 'android.intent.action.VIEW',
+                uri: url
+            });
+        }).on('click', '.netdisk-115', function() {
+            var $this = $(this);
+            var $parent = $this.parent();
+            if ($this.is('.active')) {
+                //115网盘下载
+                api.openApp({
+                    androidPkg: appsMap.app_115.androidPkg,
+                    uri: appsMap.app_115.uri.replace('{url}', Base64.decode($parent.attr('data-magnet')))
+                });
+            } else {
+                api.toast({
+                    msg: '尚未安装115网盘',
+                    duration: 2000,
+                    location: 'bottom'
+                });
+            }
+        }).on('click', '.thunder', function() {
+            var $this = $(this);
+            var $parent = $this.parent();
+            if ($this.is('.active')) {
+                //用迅雷下载
+                api.openApp({
+                    androidPkg: appsMap.app_thunder.androidPkg,
+                    uri: appsMap.app_thunder.uri.replace('{url}', ThunderURIEncode(Base64.decode($parent.attr('data-magnet'))))
+                });
+            } else {
+                api.toast({
+                    msg: '尚未安装手机迅雷',
+                    duration: 2000,
+                    location: 'bottom'
+                });
+            }
+        });
+    }
+
+    var loading = false;
+
+    function loadEngineData(pageParam) {
+        if (loading)
+            return;
+        loading = true;
+        var engine = pageParam.engine;
+        var keyWords = pageParam.keyWords;
+        var appsMap = pageParam.appsMap;
+
+        if (isFirstOpen) {
+            isFirstOpen = false;
+            pageNumberStart = engine.pageNumberStart;
+            pageNumber = pageNumberStart;
+            $('#result').empty();
+        } else {
+            pageNumber += 1;
+        }
+
+        var url = engine.url;
+        url = url.replace('{keyWords}', eval(engine.keyWordsEncode.replace("{originalKeyWords}", '"' + keyWords + '"')));
+        url = url.replace('{pageNumber}', pageNumber);
+
+        showLoading();
+        var headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.87 Safari/537.36'
+        };
+        if (url.indexOf('sobt.site') !== -1) {
+            headers['Cookie'] = 'Challenge=' + md5(headers['User-Agent']);
+        }
+        api.ajax({
+            url: url,
+            dataType: 'text',
+            headers: headers
+        }, function(ret, err) {
+            var $result = $('#result');
+            if (ret) {
+                var $html = $(ret);
+                var $resultBlock = $html.find(engine.block.selector);
+                if ($resultBlock.length === 0) {
+                    api.toast({
+                        msg: engine.name + ':已无更多数据',
+                        duration: 2000,
+                        location: 'bottom'
+                    });
+                    if ($result.children().length === 0) {
+                        $result.append('<div class="empty">无相关结果</div>');
+                    }
+                    pageNumber -= 1;
+                } else {
+                    $resultBlock.each(function(index) {
+                        var blockInfo = {};
+                        // noinspection JSUnusedLocalSymbols
+                        var $title = eval('$(this).find("' + engine.title.selector + '")');
+                        // noinspection JSUnusedLocalSymbols
+                        var $size = eval('$(this).find("' + engine.size.selector + '")');
+                        // noinspection JSUnusedLocalSymbols
+                        var $time = eval('$(this).find("' + engine.time.selector + '")');
+                        // noinspection JSUnusedLocalSymbols
+                        var $magnet = eval('$(this).find("' + engine.magnet.selector + '")');
+                        blockInfo.title = eval('$title' + engine.title.method);
+                        blockInfo.size = eval('$size' + engine.size.method);
+                        blockInfo.time = eval('$time' + engine.time.method);
+                        blockInfo.magnet = eval('$magnet' + engine.magnet.method);
+                        if (blockInfo.magnet == null || blockInfo.magnet.trim().length === 0)
+                            return;
+                        $result.append(buildItem(blockInfo, appsMap));
+                    });
+                }
+            } else {
+                api.toast({
+                    msg: engine.name + ':数据获取失败',
+                    duration: 2000,
+                    location: 'bottom'
+                });
+            }
+            api.refreshHeaderLoadDone();
+            hideLoading();
+            loading = false;
+        });
+    }
+
+    function buildItem(blockInfo, appsMap) {
+        var itemStringArray = [];
+        itemStringArray.push('<div class="item">');
+        itemStringArray.push('<div class="title">' + blockInfo.title + '</div>');
+        itemStringArray.push('<div class="info">');
+        itemStringArray.push('<div class="time">时间：' + blockInfo.time + '</div>');
+        itemStringArray.push('<div class="size">大小：' + blockInfo.size + '</div>');
+        itemStringArray.push('<div class="option" data-magnet="' + Base64.encode(blockInfo.magnet) + '">' +
+            '<span class="copy"><i class="iconfont icon-copy"></i>复制</span>' +
+            '<span class="download"><i class="iconfont icon-download"></i>下载</span>' +
+            '<span class="netdisk-115 ' + (appsMap.app_115.installed ? 'active' : '') + '"><i class="iconfont icon-115"></i>115</span>' +
+            '<span class="thunder ' + (appsMap.app_thunder.installed ? 'active' : '') + '"><i class="iconfont icon-thunder"></i>迅雷</span>' +
+            '</div>');
+        itemStringArray.push('</div>');
+        itemStringArray.push('</div>');
+        return itemStringArray.join('');
+    }
+
+    apiready = function() {
+        var pageParam = api.pageParam;
+
+        initEvent(pageParam);
+
+        loadEngineData(pageParam);
+    };
+</script>
+
+</html>

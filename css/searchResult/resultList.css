@@ -1,0 +1,153 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-size: 62.5%;
+}
+html *,
+body * {
+  font-size: 1.4rem;
+}
+footer {
+  height: 3rem;
+  width: 100%;
+  background-color: #ff5722;
+  color: #fff;
+  line-height: 3rem;
+  text-align: center;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+.loading {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 10rem;
+  height: 5rem;
+  line-height: 5rem;
+  margin-left: -5rem;
+  margin-top: -5.5rem;
+  text-align: center;
+}
+.loading.show {
+  display: block;
+}
+.loading div {
+  width: 0.5rem;
+  height: 1.5rem;
+  background-color: #ff5722;
+  display: inline-block;
+  animation: load 0.5s cubic-bezier(0.77, 0.47, 0.64, 0.28) alternate infinite;
+  -webkit-animation: load 0.5s cubic-bezier(0.77, 0.47, 0.64, 0.28) alternate infinite;
+}
+.loading div:nth-child(1) {
+  animation-delay: -0.5s;
+}
+.loading div:nth-child(2) {
+  animation-delay: -0.4s;
+}
+.loading div:nth-child(3) {
+  animation-delay: -0.3s;
+}
+.loading div:nth-child(4) {
+  animation-delay: -0.2s;
+}
+.loading div:nth-child(5) {
+  animation-delay: -0.1s;
+}
+@-webkit-keyframes load {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(3);
+  }
+}
+#result {
+  padding: 1rem;
+}
+#result .empty {
+  height: 5rem;
+  line-height: 5rem;
+  text-align: center;
+  font-size: 1.6rem;
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  margin-top: -9.3rem;
+}
+#result .item {
+  padding: 1rem;
+  box-shadow: 0 0 0.5rem #ccc;
+  box-sizing: border-box;
+  word-break: break-all;
+  margin-bottom: 1rem;
+}
+#result .item:last-of-type {
+  margin-bottom: 0;
+}
+#result .item .title {
+  font-size: 1.6rem;
+}
+#result .item .info .size,
+#result .item .info .time {
+  font-size: 1.2rem;
+  color: #666;
+  display: inline-block;
+  width: 50%;
+}
+#result .item .option {
+  text-align: right;
+}
+#result .item .option span {
+  padding: 0 0.5rem;
+  display: inline-block;
+  color: #aaa;
+}
+#result .item .option span.netdisk-115.active {
+  color: #00a8ff;
+}
+#result .item .option span.thunder.active {
+  color: #2f71f1;
+}
+#result .item .option span.copy,
+#result .item .option span.download {
+  color: #ff5722;
+}
+@-moz-keyframes load {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(3);
+  }
+}
+@-webkit-keyframes load {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(3);
+  }
+}
+@-o-keyframes load {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(3);
+  }
+}
+@keyframes load {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(3);
+  }
+}

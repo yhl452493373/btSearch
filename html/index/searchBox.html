@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/index/searchBox.css"/>
+</head>
+<body>
+<input id="searchBox" type="text" placeholder="搜电影，软件，明星，番号，搜啥有啥！" readonly>
+</body>
+<script type="text/javascript" src="../../script/api.js"></script>
+<script type="text/javascript">
+    function initEvent() {
+        $api.addEvt($api.byId('searchBox'), 'click', function () {
+            openSearchWindow();
+        });
+    }
+
+    function openSearchWindow() {
+        api.openWin({
+            name: 'search',
+            url: '../search.html'
+        });
+    }
+
+    apiready = function () {
+        initEvent();
+    };
+</script>
+</html>

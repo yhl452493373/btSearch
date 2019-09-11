@@ -1,0 +1,19 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-size: 62.5%;
+}
+html *,
+body * {
+  font-size: 1.4rem;
+}
+footer {
+  height: 3rem;
+  width: 100%;
+  background-color: #ff5722;
+  color: #fff;
+  line-height: 3rem;
+  text-align: center;
+}

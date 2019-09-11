@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/search/search.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/iconfont/iconfont.css">
+</head>
+<body>
+<header>
+    <div class="header-button" id="closeWindow"><i class="iconfont icon-back"></i>返回</div>
+    <div class="header-title">
+        <i class="iconfont icon-search"></i>
+        <input type="search" id="keyWords" placeholder="搜电影，软件，明星，番号…">
+        <i class="iconfont icon-trans"></i>
+    </div>
+    <div class="header-button" id="search">搜索</div>
+</header>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/language.js"></script>
+<script type="text/javascript">
+    var historyFile = 'fs://btHistory.txt';
+
+    function initView() {
+        var header = $api.dom('header');
+        var headerH = $api.fixStatusBar(header);
+
+        api.openFrame({
+            name: 'searchRecord',
+            url: 'search/searchRecord.html',
+            rect: {
+                marginTop: headerH,
+                w: 'auto'
+            },
+            bounces: true
+        });
+    }
+
+    function initEvent() {
+        $api.addEvt($api.byId('closeWindow'), 'click', function () {
+            closeWindow();
+        });
+
+        $api.addEvt($api.byId('search'), 'click', function () {
+            search();
+        });
+
+        $api.addEvt($api.byId('keyWords'), 'keyup', function (e) {
+            e.preventDefault();
+            if (e.keyCode === 13) {
+                search();
+            }
+        });
+
+        var language = 1;
+        $api.addEvt($api.dom('.icon-trans'), 'click', function () {
+            var input = $api.dom('#keyWords');
+            var val = $api.val(input);
+            if (val == null || val.trim().length === 0)
+                return;
+            language === 1 && $api.val(input, traditionalized(val));
+            language === -1 && $api.val(input, simplized(val));
+            language *= -1;
+        });
+    }
+
+    function closeWindow() {
+        api.closeWin();
+    }
+
+    function search() {
+        var keyWords = $api.val($api.byId('keyWords'));
+        if (keyWords != null && keyWords.trim().length === 0) {
+            api.toast({
+                msg: '搜索词不能为空',
+                duration: 2000,
+                location: 'bottom'
+            });
+            return;
+        }
+
+        keyWords = keyWords.trim();
+
+        api.readFile({
+            path: historyFile
+        }, function (ret, err) {
+            if (ret.status) {
+                var historyString = ret.data;
+                var historyArray = historyString.split(/\n/);
+                if (historyArray.indexOf(keyWords) === -1) {
+                    api.writeFile({
+                        path: historyFile,
+                        data: keyWords + '\n',
+                        append: true
+                    }, function (ret, err) {
+                        if (ret.status) {
+                            var restoreHistory = 'restoreHistory(true);';
+                            api.execScript({
+                                frameName: 'searchRecord',
+                                script: restoreHistory
+                            });
+                        } else {
+
+                        }
+                    });
+                }
+            } else {
+                api.writeFile({
+                    path: historyFile,
+                    data: keyWords + '\n',
+                    append: true
+                }, function (ret, err) {
+                    if (ret.status) {
+                        var restoreHistory = 'restoreHistory(true);';
+                        api.execScript({
+                            frameName: 'searchRecord',
+                            script: restoreHistory
+                        });
+                    } else {
+
+                    }
+                });
+            }
+        });
+
+        api.openWin({
+            name: 'searchResult',
+            url: 'searchResult.html',
+            pageParam: {
+                keyWords: keyWords
+            }
+        });
+    }
+
+    apiready = function () {
+        initView();
+        initEvent();
+    };
+</script>
+</html>

@@ -1,0 +1,66 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-size: 62.5%;
+}
+html *,
+body * {
+  font-size: 1.4rem;
+}
+footer {
+  height: 3rem;
+  width: 100%;
+  background-color: #ff5722;
+  color: #fff;
+  line-height: 3rem;
+  text-align: center;
+}
+.clear {
+  font-size: 1.4rem;
+  height: 3rem;
+  line-height: 3rem;
+  text-align: center;
+  color: #aaa;
+  border-bottom: 0.1rem solid #eee;
+  margin: 0 1rem;
+}
+ul,
+li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+li {
+  display: flex;
+  height: 4rem;
+  line-height: 4rem;
+  position: relative;
+  margin-left: 1rem;
+  color: #999;
+}
+li:after {
+  content: '';
+  height: 0.1rem;
+  width: 100%;
+  background: #eee;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+li .text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+li .delete {
+  flex-basis: 4rem;
+  text-align: center;
+}
+li .iconfont {
+  display: inline-block;
+  width: 3rem;
+  text-align: center;
+}
